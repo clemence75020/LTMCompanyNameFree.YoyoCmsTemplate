@@ -32,9 +32,8 @@ export class AppPreBootstrap {
 
   private static getApplicationConfig(callback: () => void) {
     // TODO:当前地址
-    let baseUrl = window.location.protocol + '//' + window.location.host;
-    AppConsts.appBaseUrl = baseUrl;
-    AppConsts.remoteServiceBaseUrl = baseUrl;
+    AppConsts.appBaseUrl = window.location.protocol + '//' + window.location.host + "/test";
+    AppConsts.remoteServiceBaseUrl = window.location.protocol + '//' + window.location.host;
     LocalizationService.localizationSourceName = AppConsts.localization.defaultLocalizationSourceName;
     callback();
   }

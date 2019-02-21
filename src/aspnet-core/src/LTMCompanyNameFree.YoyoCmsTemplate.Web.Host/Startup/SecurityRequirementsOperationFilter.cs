@@ -27,7 +27,8 @@ namespace LTMCompanyNameFree.YoyoCmsTemplate.Web.Host.Startup
             var controllerAbpAuthorizeAttrs = controllerAttrs.OfType<AbpAuthorizeAttribute>();
             if (controllerAbpAuthorizeAttrs.Any() || actionAbpAuthorizeAttrs.Any())
             {
-                operation.Responses.Add("401", new Response { Description = "Unauthorized" });
+                AddResponseData(operation.Responses,"401", new Response { Description = "Unauthorized" });
+                //operation.Responses.Add("401", new Response { Description = "Unauthorized" });
 
                 var permissions = controllerAbpAuthorizeAttrs.Union(actionAbpAuthorizeAttrs)
                     .SelectMany(p => p.Permissions)
@@ -35,7 +36,8 @@ namespace LTMCompanyNameFree.YoyoCmsTemplate.Web.Host.Startup
 
                 if (permissions.Any())
                 {
-                    operation.Responses.Add("403", new Response { Description = "Forbidden" });
+                    AddResponseData(operation.Responses, "403", new Response { Description = "Forbidden" });
+                    //operation.Responses.Add("403", new Response { Description = "Forbidden" });
                 }
 
                 operation.Security = new List<IDictionary<string, IEnumerable<string>>>
@@ -45,6 +47,14 @@ namespace LTMCompanyNameFree.YoyoCmsTemplate.Web.Host.Startup
                         { "bearerAuth", permissions }
                     }
                 };
+            }
+        }
+
+        static void AddResponseData(IDictionary<string, Response> responses, string key, Response value)
+        {
+            if (!responses.Any(o => o.Key == key))
+            {
+                responses.Add(key, value);
             }
         }
     }

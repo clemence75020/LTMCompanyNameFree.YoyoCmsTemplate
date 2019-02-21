@@ -8,7 +8,9 @@ namespace LTMCompanyNameFree.YoyoCmsTemplate.Models.TokenAuth
         [Required]
         [StringLength(AbpUserBase.MaxEmailAddressLength)]
         public string UserNameOrEmailAddress { get; set; }
-
+        /// <summary>
+        /// 
+        /// </summary>
         [Required]
         [StringLength(AbpUserBase.MaxPlainPasswordLength)]
         public string Password { get; set; }

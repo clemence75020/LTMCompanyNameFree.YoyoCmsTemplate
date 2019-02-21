@@ -1,5 +1,5 @@
 import { NgModule, Injector } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { CommonModule, APP_BASE_HREF } from '@angular/common';
 
 import { RootComponent } from 'root.component';
 import { AppSessionService } from '@shared/session/app-session.service';
@@ -85,6 +85,10 @@ export function getCurrentLanguage(): string {
     {
       provide: LOCALE_ID,
       useFactory: getCurrentLanguage,
+    },
+    {
+      provide: APP_BASE_HREF,
+      useValue: '/test'
     },
     TitleService,
   ],

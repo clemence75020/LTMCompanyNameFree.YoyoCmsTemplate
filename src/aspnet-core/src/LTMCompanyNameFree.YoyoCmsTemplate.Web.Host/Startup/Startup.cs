@@ -18,6 +18,11 @@ using LTMCompanyNameFree.YoyoCmsTemplate.Identity;
 
 using Abp.AspNetCore.SignalR.Hubs;
 using Microsoft.AspNetCore.SpaServices.AngularCli;
+using Microsoft.Extensions.FileProviders;
+using System.IO;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Rewrite;
+using Microsoft.AspNetCore.Http;
 
 namespace LTMCompanyNameFree.YoyoCmsTemplate.Web.Host.Startup
 {
@@ -32,6 +37,11 @@ namespace LTMCompanyNameFree.YoyoCmsTemplate.Web.Host.Startup
             _appConfiguration = env.GetAppConfiguration();
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="services"></param>
+        /// <returns></returns>
         public IServiceProvider ConfigureServices(IServiceCollection services)
         {
             // MVC
@@ -62,8 +72,9 @@ namespace LTMCompanyNameFree.YoyoCmsTemplate.Web.Host.Startup
                         .AllowAnyMethod()
                         .AllowCredentials()
                 )
-            ); 
+            );
 #endif
+
 
             // Swagger - Enable this line and the related lines in Configure method to enable swagger UI
             services.AddSwaggerGen(options =>
@@ -86,6 +97,7 @@ namespace LTMCompanyNameFree.YoyoCmsTemplate.Web.Host.Startup
             // In production, the Angular files will be served from this directory
             services.AddSpaStaticFiles(configuration =>
             {
+
                 configuration.RootPath = "ClientApp/dist";
             });
 
@@ -100,57 +112,83 @@ namespace LTMCompanyNameFree.YoyoCmsTemplate.Web.Host.Startup
 
         public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory)
         {
-            app.UseAbp(options => { options.UseAbpRequestLocalization = false; }); // Initializes ABP framework.
-
-            app.UseCors(_defaultCorsPolicyName); // Enable CORS!
-
-            app.UseStaticFiles();
-
-            // Use SPA Static Files
-            app.UseSpaStaticFiles();
 
 
-            app.UseAuthentication();
+            app.Map("/test", testApp =>
+             {
+                 //testApp.UseSpaAbsolute(env, "/", @"D:\develop\staneee\AngularApps\FreeAppTest");
+                 testApp.UseSpaStaticFiles();
+                 testApp.UseSpaAbsolute(env, "/test", @"D:\develop\staneee\AngularApps\FreeAppTest");
+                 // Use SPA Static Files
+                 testApp.UseSpa(spa =>
+                 {
+                     // 开发模式使用反向代理
+                     if (env.IsDevelopment())
+                     {
+                         spa.UseProxyToSpaDevelopmentServer("http://127.0.0.1:4201");
+                     }
+                 });
 
-            app.UseAbpRequestLocalization();
+                 testApp.Run(async (context) =>
+                 {
+                     await context.Response.WriteAsync("");
+                 });
 
+             });
 
-            app.UseSignalR(routes =>
+            app.Map("/abc", abcApp =>
             {
-                routes.MapHub<AbpCommonHub>("/signalr");
-            });
-
-            app.UseMvc(routes =>
-            {
-                routes.MapRoute(
-                    name: "default",
-                    template: "{controller}/{action=Index}/{id?}");
-            });
-
-            // Use SPA Static Files
-            app.UseSpa(spa =>
-            {
-                // To learn more about options for serving an Angular SPA from ASP.NET Core,
-                // see https://go.microsoft.com/fwlink/?linkid=864501
-
-                spa.Options.SourcePath = "ClientApp";
-
-                // If development mode use npm start
-                if (env.IsDevelopment())
+                abcApp.UseSpaAbsolute(env, "/abc", @"D:\develop\staneee\AngularApps\FreeAppAbc");
+                abcApp.UseSpa(spa =>
                 {
-                    spa.UseAngularCliServer(npmScript: "start");
-                }
+                    // 开发模式使用反向代理
+                    if (env.IsDevelopment())
+                    {
+                        spa.UseProxyToSpaDevelopmentServer("http://127.0.0.1:4202");
+                    }
+                });
+
             });
 
-            // Enable middleware to serve generated Swagger as a JSON endpoint
-            app.UseSwagger();
-            // Enable middleware to serve swagger-ui assets (HTML, JS, CSS etc.)
-            app.UseSwaggerUI(options =>
+            app.Map("", mpa =>
             {
-                options.SwaggerEndpoint("/swagger/v1/swagger.json", "YoyoCmsTemplate API V1");
-                options.IndexStream = () => Assembly.GetExecutingAssembly()
-                    .GetManifestResourceStream("LTMCompanyNameFree.YoyoCmsTemplate.Web.Host.wwwroot.swagger.ui.index.html");
-            }); // URL: /swagger
+                // Initializes ABP framework.
+                mpa.UseAbp(options => { options.UseAbpRequestLocalization = false; });
+
+                // Enable CORS!
+                mpa.UseCors(_defaultCorsPolicyName); 
+                mpa.UseStaticFiles();
+
+                mpa.UseAuthentication();
+
+                mpa.UseAbpRequestLocalization();
+
+                mpa.UseSignalR(routes =>
+                {
+                    routes.MapHub<AbpCommonHub>("/signalr");
+                });
+
+                mpa.UseMvc(routes =>
+                {
+                    routes.MapRoute(
+                        name: "area",
+                        template: "{area:exists}/{controller=Home}/{action=Index}/{id?}");
+                    routes.MapRoute(
+                        name: "default",
+                        template: "{controller=Home}/{action=Index}/{id?}");
+                });
+
+                mpa.UseSwagger();
+                // Enable middleware to serve swagger-ui assets (HTML, JS, CSS etc.)
+                mpa.UseSwaggerUI(options =>
+                {
+                    options.SwaggerEndpoint("/swagger/v1/swagger.json", "YoyoCmsTemplate API V1");
+                    options.IndexStream = () => Assembly.GetExecutingAssembly()
+                        .GetManifestResourceStream("LTMCompanyNameFree.YoyoCmsTemplate.Web.Host.wwwroot.swagger.ui.index.html");
+                }); // URL: /swagger
+
+            });
+
         }
     }
 }

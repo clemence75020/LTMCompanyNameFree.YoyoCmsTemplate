@@ -46,6 +46,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Rewrite" Version="2.1.0" />
     <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="2.1.0">
       <PrivateAssets>All</PrivateAssets>
     </PackageReference>
@@ -99,12 +100,7 @@
   <Target Name="PublishRunWebpack" AfterTargets="ComputeFilesToPublish">
     <!-- As part of publishing, ensure the JS resources are freshly built in production mode -->
     
-    <!-- use yarn or npm restore packages -->
-    <Exec WorkingDirectory="$(SpaRoot)" Command="yarn" />
-    <!--<Exec WorkingDirectory="$(SpaRoot)" Command="npm install" />-->
-    <Exec WorkingDirectory="$(SpaRoot)" Command="npm run build -- --prod --build-optimizer" />
-    <Exec WorkingDirectory="$(SpaRoot)" Command="npm run build:ssr -- --prod --build-optimizer" Condition=" '$(BuildServerSideRenderer)' == 'true' " />
-
+   
     <!-- Include the newly-built files in the publish output -->
     <ItemGroup>
       <DistFiles Include="$(SpaRoot)dist\**; $(SpaRoot)dist-server\**" />
